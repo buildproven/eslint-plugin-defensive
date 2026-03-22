@@ -3,14 +3,13 @@
  * @description Prevents division by zero errors
  */
 
-'use strict'
+'use strict';
 
 module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Require guard clause before division to prevent division by zero',
+      description: 'Require guard clause before division to prevent division by zero',
       category: 'Best Practices',
       recommended: true,
     },
@@ -24,8 +23,7 @@ module.exports = {
         properties: {
           allowLiterals: {
             type: 'boolean',
-            description:
-              "Allow division by literal numbers (they can't be zero at runtime)",
+            description: "Allow division by literal numbers (they can't be zero at runtime)",
           },
         },
         additionalProperties: false,
@@ -34,59 +32,55 @@ module.exports = {
   },
 
   create(context) {
-    const options = context.options[0] || {}
-    const allowLiterals = options.allowLiterals !== false // Default true
+    const options = context.options[0] || {};
+    const allowLiterals = options.allowLiterals !== false; // Default true
 
     function isDivisorGuarded(node, divisorName) {
       // Walk up the AST to find if there's a guard
-      let parent = node.parent
-      let depth = 0
-      const maxDepth = 10
+      let parent = node.parent;
+      let depth = 0;
+      const maxDepth = 10;
 
       while (parent && depth < maxDepth) {
         // Check for ternary: divisor > 0 ? ... : ...
         // or: divisor !== 0 ? ... : ...
         // or: divisor ? ... : ...
         if (parent.type === 'ConditionalExpression') {
-          const test = parent.test
+          const test = parent.test;
 
           // Check: divisor > 0
           if (
             test.type === 'BinaryExpression' &&
-            (test.operator === '>' ||
-              test.operator === '!==' ||
-              test.operator === '!=') &&
+            (test.operator === '>' || test.operator === '!==' || test.operator === '!=') &&
             test.left.type === 'Identifier' &&
             test.left.name === divisorName
           ) {
-            return true
+            return true;
           }
 
           // Check: divisor (truthy check)
           if (test.type === 'Identifier' && test.name === divisorName) {
-            return true
+            return true;
           }
         }
 
         // Check for if statement guard
         if (parent.type === 'IfStatement') {
-          const test = parent.test
+          const test = parent.test;
 
           // Check: if (divisor > 0)
           if (
             test.type === 'BinaryExpression' &&
-            (test.operator === '>' ||
-              test.operator === '!==' ||
-              test.operator === '!=') &&
+            (test.operator === '>' || test.operator === '!==' || test.operator === '!=') &&
             test.left.type === 'Identifier' &&
             test.left.name === divisorName
           ) {
-            return true
+            return true;
           }
 
           // Check: if (divisor)
           if (test.type === 'Identifier' && test.name === divisorName) {
-            return true
+            return true;
           }
 
           // Check: if (!divisor) return; (early return pattern)
@@ -98,41 +92,34 @@ module.exports = {
           ) {
             // This is a guard if we're NOT in the consequent (the if block)
             // We're safe if we're in code after the if
-            return true
+            return true;
           }
         }
 
         // Check for logical AND: divisor && (value / divisor)
         if (parent.type === 'LogicalExpression' && parent.operator === '&&') {
-          if (
-            parent.left.type === 'Identifier' &&
-            parent.left.name === divisorName
-          ) {
-            return true
+          if (parent.left.type === 'Identifier' && parent.left.name === divisorName) {
+            return true;
           }
         }
 
-        parent = parent.parent
-        depth++
+        parent = parent.parent;
+        depth++;
       }
 
-      return false
+      return false;
     }
 
     return {
       BinaryExpression(node) {
         if (node.operator !== '/') {
-          return
+          return;
         }
 
-        const divisor = node.right
+        const divisor = node.right;
 
         // Allow literal numbers (can't be zero at runtime if non-zero in code)
-        if (
-          allowLiterals &&
-          divisor.type === 'Literal' &&
-          typeof divisor.value === 'number'
-        ) {
+        if (allowLiterals && divisor.type === 'Literal' && typeof divisor.value === 'number') {
           if (divisor.value === 0) {
             // Literal zero is always an error
             context.report({
@@ -142,22 +129,22 @@ module.exports = {
                 divisor: '0',
                 expression: context.getSourceCode().getText(node),
               },
-            })
+            });
           }
-          return
+          return;
         }
 
         // Get divisor name for variable checks
-        let divisorName = null
+        let divisorName = null;
         if (divisor.type === 'Identifier') {
-          divisorName = divisor.name
+          divisorName = divisor.name;
         } else if (divisor.type === 'MemberExpression' && !divisor.computed) {
-          divisorName = divisor.property.name
+          divisorName = divisor.property.name;
         }
 
         // If we can't determine the divisor name, skip (complex expression)
         if (!divisorName) {
-          return
+          return;
         }
 
         // Check if divisor is guarded
@@ -169,9 +156,9 @@ module.exports = {
               divisor: divisorName,
               expression: context.getSourceCode().getText(node),
             },
-          })
+          });
         }
       },
-    }
+    };
   },
-}
+};

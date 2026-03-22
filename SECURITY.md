@@ -14,6 +14,7 @@ Instead, report vulnerabilities by emailing the maintainer directly or using Git
 **Security > Report a vulnerability** on the repository page.
 
 Include:
+
 - A description of the vulnerability
 - Steps to reproduce
 - Potential impact

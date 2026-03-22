@@ -3,10 +3,10 @@
  * @description Prevents unauthenticated API endpoints
  */
 
-'use strict'
+'use strict';
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 
 module.exports = {
   meta: {
@@ -41,82 +41,74 @@ module.exports = {
   },
 
   create(context) {
-    const options = context.options[0] || {}
+    const options = context.options[0] || {};
     let authWrappers = options.authWrappers || [
       'withAuth',
       'withApiAuth',
       'withSession',
       'requireAuth',
       'authenticated',
-    ]
-    let publicRoutes = options.publicRoutes || []
+    ];
+    let publicRoutes = options.publicRoutes || [];
 
     // Try to load from .defensive-patterns.json
     try {
-      const configPath = path.join(process.cwd(), '.defensive-patterns.json')
+      const configPath = path.join(process.cwd(), '.defensive-patterns.json');
       if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         if (config.authWrappers) {
-          authWrappers = config.authWrappers
+          authWrappers = config.authWrappers;
         }
         if (config.publicRoutes) {
-          publicRoutes = config.publicRoutes
+          publicRoutes = config.publicRoutes;
         }
       }
     } catch {
       // Config file doesn't exist or is invalid, use defaults
     }
 
-    const filename = context.getFilename()
+    const filename = context.getFilename();
 
     // Check if this is an API route file
     const isApiRoute =
       filename.includes('/api/') ||
       filename.includes('\\api\\') ||
       filename.includes('/route.ts') ||
-      filename.includes('/route.js')
+      filename.includes('/route.js');
 
     if (!isApiRoute) {
-      return {}
+      return {};
     }
 
     // Check if this route is in publicRoutes using simple glob matching
     // Uses string operations instead of RegExp to avoid security lint issues
-    const isPublicRoute = publicRoutes.some(pattern => {
+    const isPublicRoute = publicRoutes.some((pattern) => {
       // Convert glob pattern to segments for matching
       // Supports: **/path/**, */file, exact/path
-      const segments = pattern.split('*').filter(Boolean)
+      const segments = pattern.split('*').filter(Boolean);
 
       if (segments.length === 0) {
         // Pattern is all wildcards, matches everything
-        return true
+        return true;
       }
 
       // Check if all non-wildcard segments appear in the filename in order
-      let lastIndex = -1
+      let lastIndex = -1;
       for (const segment of segments) {
-        const index = filename.indexOf(segment, lastIndex + 1)
+        const index = filename.indexOf(segment, lastIndex + 1);
         if (index === -1) {
-          return false
+          return false;
         }
-        lastIndex = index + segment.length - 1
+        lastIndex = index + segment.length - 1;
       }
-      return true
-    })
+      return true;
+    });
 
     if (isPublicRoute) {
-      return {}
+      return {};
     }
 
-    const httpMethods = [
-      'GET',
-      'POST',
-      'PUT',
-      'PATCH',
-      'DELETE',
-      'HEAD',
-      'OPTIONS',
-    ]
+    const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
     function isWrappedWithAuth(node) {
       // Check if the export is wrapped: export const GET = withAuth(...)
@@ -126,7 +118,7 @@ module.exports = {
         node.init.callee.type === 'Identifier' &&
         authWrappers.includes(node.init.callee.name)
       ) {
-        return true
+        return true;
       }
 
       // Check for: export const GET = withAuth(async (req) => {...})
@@ -135,32 +127,29 @@ module.exports = {
         node.init.type === 'CallExpression' &&
         node.init.callee.type === 'Identifier'
       ) {
-        return authWrappers.includes(node.init.callee.name)
+        return authWrappers.includes(node.init.callee.name);
       }
 
-      return false
+      return false;
     }
 
     return {
       ExportNamedDeclaration(node) {
-        if (!node.declaration) return
+        if (!node.declaration) return;
 
         // Handle: export const GET = ...
         if (node.declaration.type === 'VariableDeclaration') {
-          node.declaration.declarations.forEach(decl => {
-            if (
-              decl.id.type === 'Identifier' &&
-              httpMethods.includes(decl.id.name)
-            ) {
+          node.declaration.declarations.forEach((decl) => {
+            if (decl.id.type === 'Identifier' && httpMethods.includes(decl.id.name)) {
               if (!isWrappedWithAuth(decl)) {
                 context.report({
                   node: decl,
                   messageId: 'missingAuth',
                   data: { name: decl.id.name },
-                })
+                });
               }
             }
-          })
+          });
         }
 
         // Handle: export async function GET(...)
@@ -174,9 +163,9 @@ module.exports = {
             node: node.declaration,
             messageId: 'missingAuth',
             data: { name: node.declaration.id.name },
-          })
+          });
         }
       },
-    }
+    };
   },
-}
+};

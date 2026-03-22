@@ -2,7 +2,7 @@
  * Recommended configuration for eslint-plugin-defensive
  */
 
-'use strict'
+'use strict';
 
 module.exports = {
   plugins: ['defensive'],
@@ -13,4 +13,4 @@ module.exports = {
     'defensive/require-useCallback': 'warn',
     'defensive/require-guard-clause': 'warn',
   },
-}
+};

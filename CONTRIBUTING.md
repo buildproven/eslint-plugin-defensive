@@ -33,6 +33,7 @@ index.js       - Plugin entry point
 5. Add tests.
 
 Each rule module must export an object with:
+
 - `meta` - Rule metadata (`type`, `docs`, `messages`, `schema`)
 - `create(context)` - Returns an AST visitor object
 
@@ -44,6 +45,7 @@ Each rule module must export an object with:
 4. Open a pull request with a description of what the rule catches and why it matters.
 
 Pull requests that add rules should include:
+
 - The rule implementation
 - At least one "bad" and one "good" code example in the PR description
 - A README section for the new rule
@@ -51,6 +53,7 @@ Pull requests that add rules should include:
 ## Reporting Issues
 
 Open a GitHub Issue with:
+
 - ESLint version
 - Node.js version
 - A minimal code sample that triggers (or fails to trigger) the rule

@@ -3,14 +3,13 @@
  * @description Prevents re-render storms from unstable function references
  */
 
-'use strict'
+'use strict';
 
 module.exports = {
   meta: {
     type: 'suggestion',
     docs: {
-      description:
-        'Require useCallback for inline arrow function handlers in JSX',
+      description: 'Require useCallback for inline arrow function handlers in JSX',
       category: 'Performance',
       recommended: true,
     },
@@ -38,16 +37,11 @@ module.exports = {
   },
 
   create(context) {
-    const options = context.options[0] || {}
-    const ignoredProps = options.ignoredProps || [
-      'render',
-      'renderItem',
-      'children',
-      'component',
-    ]
-    const maxInlineHandlers = options.maxInlineHandlers ?? 0
+    const options = context.options[0] || {};
+    const ignoredProps = options.ignoredProps || ['render', 'renderItem', 'children', 'component'];
+    const maxInlineHandlers = options.maxInlineHandlers ?? 0;
 
-    let inlineHandlerCount = 0
+    let inlineHandlerCount = 0;
     const handlerProps = [
       'onClick',
       'onChange',
@@ -64,27 +58,25 @@ module.exports = {
       'onDrop',
       'onInput',
       'onSelect',
-    ]
+    ];
 
     return {
       JSXAttribute(node) {
         // Check if this is an event handler prop
-        const propName = node.name.name
+        const propName = node.name.name;
 
         // Skip ignored props
         if (ignoredProps.includes(propName)) {
-          return
+          return;
         }
 
         // Check if it's a handler prop (on* pattern)
         const isHandlerProp =
           handlerProps.includes(propName) ||
-          (propName &&
-            propName.startsWith('on') &&
-            propName[2] === propName[2].toUpperCase())
+          (propName && propName.startsWith('on') && propName[2] === propName[2].toUpperCase());
 
         if (!isHandlerProp) {
-          return
+          return;
         }
 
         // Check if the value is an inline arrow function
@@ -93,22 +85,22 @@ module.exports = {
           node.value.type === 'JSXExpressionContainer' &&
           node.value.expression.type === 'ArrowFunctionExpression'
         ) {
-          inlineHandlerCount++
+          inlineHandlerCount++;
 
           if (inlineHandlerCount > maxInlineHandlers) {
             context.report({
               node,
               messageId: 'inlineHandler',
               data: { prop: propName },
-            })
+            });
           }
         }
       },
 
       'Program:exit'() {
         // Reset counter for next file
-        inlineHandlerCount = 0
+        inlineHandlerCount = 0;
       },
-    }
+    };
   },
-}
+};
