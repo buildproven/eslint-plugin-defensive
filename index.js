@@ -7,14 +7,14 @@
  * Based on common patterns that slip through standard quality checks.
  */
 
-'use strict'
+'use strict';
 
-const noUnsafeJsonParse = require('./rules/no-unsafe-json-parse')
-const noEmptyCatch = require('./rules/no-empty-catch')
-const requireAuthMiddleware = require('./rules/require-auth-middleware')
-const requireUseCallback = require('./rules/require-useCallback')
-const requireGuardClause = require('./rules/require-guard-clause')
-const recommended = require('./configs/recommended')
+const noUnsafeJsonParse = require('./rules/no-unsafe-json-parse');
+const noEmptyCatch = require('./rules/no-empty-catch');
+const requireAuthMiddleware = require('./rules/require-auth-middleware');
+const requireUseCallback = require('./rules/require-useCallback');
+const requireGuardClause = require('./rules/require-guard-clause');
+const recommended = require('./configs/recommended');
 
 module.exports = {
   meta: {
@@ -31,4 +31,4 @@ module.exports = {
   configs: {
     recommended,
   },
-}
+};

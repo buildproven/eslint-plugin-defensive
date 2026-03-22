@@ -3,7 +3,7 @@
  * @description Prevents uncaught JSON parse errors and type coercion attacks
  */
 
-'use strict'
+'use strict';
 
 module.exports = {
   meta: {
@@ -30,15 +30,15 @@ module.exports = {
           node.callee.property.name === 'parse'
         ) {
           // Check if inside a try block
-          let parent = node.parent
-          let isInTry = false
-          let isInZodSafeParse = false
+          let parent = node.parent;
+          let isInTry = false;
+          let isInZodSafeParse = false;
 
           while (parent) {
             // Check if inside try block
             if (parent.type === 'TryStatement') {
-              isInTry = true
-              break
+              isInTry = true;
+              break;
             }
 
             // Check if result is passed to .safeParse() or schema validation
@@ -48,8 +48,8 @@ module.exports = {
               parent.callee.type === 'MemberExpression' &&
               parent.callee.property.name === 'safeParse'
             ) {
-              isInZodSafeParse = true
-              break
+              isInZodSafeParse = true;
+              break;
             }
 
             // Check if inside a function that's a catch handler argument
@@ -58,21 +58,21 @@ module.exports = {
               parent.callee.type === 'MemberExpression' &&
               parent.callee.property.name === 'catch'
             ) {
-              isInTry = true
-              break
+              isInTry = true;
+              break;
             }
 
-            parent = parent.parent
+            parent = parent.parent;
           }
 
           if (!isInTry && !isInZodSafeParse) {
             context.report({
               node,
               messageId: 'unsafeJsonParse',
-            })
+            });
           }
         }
       },
-    }
+    };
   },
-}
+};

@@ -36,14 +36,18 @@ node -e "require('./index.js')"  # Smoke test: verify plugin loads
 No test framework is configured yet (EPD-001). When added, tests should use ESLint's `RuleTester` class:
 
 ```javascript
-const { RuleTester } = require('eslint')
-const rule = require('../rules/no-unsafe-json-parse')
+const { RuleTester } = require('eslint');
+const rule = require('../rules/no-unsafe-json-parse');
 
-const tester = new RuleTester({ parserOptions: { ecmaVersion: 2022 } })
+const tester = new RuleTester({ parserOptions: { ecmaVersion: 2022 } });
 tester.run('no-unsafe-json-parse', rule, {
-  valid: [ /* ... */ ],
-  invalid: [ /* ... */ ],
-})
+  valid: [
+    /* ... */
+  ],
+  invalid: [
+    /* ... */
+  ],
+});
 ```
 
 ## Coding Style & Naming Conventions
