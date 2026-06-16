@@ -1,0 +1,27 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5
+        with:
+          # GITHUB_TOKEN is sufficient here because this is TAG + CHANGELOG ONLY:
+          # release-please maintains a release PR, cuts a GitHub release, and tags
+          # vX.Y.Z. There is NO downstream tag-triggered workflow (no npm publish),
+          # so the GITHUB_TOKEN limitation of not triggering further workflows on
+          # the tag it pushes does not matter.
+          #
+          # NOTE: if an npm-publish workflow is added later (triggered by the
+          # `v*` tag / release `published` event), swap this for a PAT named
+          # RELEASE_PLEASE_TOKEN so the tag/release event actually fires that
+          # workflow. GITHUB_TOKEN-pushed tags do not trigger other workflows.
+          token: ${{ secrets.GITHUB_TOKEN }}
