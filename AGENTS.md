@@ -56,8 +56,12 @@ const rule = require('../rules/no-unsafe-json-parse');
 
 const tester = new RuleTester({ parserOptions: { ecmaVersion: 2022 } });
 tester.run('no-unsafe-json-parse', rule, {
-  valid: [ /* ... */ ],
-  invalid: [ /* ... */ ],
+  valid: [
+    /* ... */
+  ],
+  invalid: [
+    /* ... */
+  ],
 });
 ```
 
