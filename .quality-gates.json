@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "gates": {
+    "security": {
+      "executable": "npm",
+      "args": ["run", "security:scan"]
+    }
+  }
+}
